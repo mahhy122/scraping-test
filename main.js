@@ -5,6 +5,7 @@ function main(){
   let html = post(year,address);
   
   //学部にアクセス
+  let faculty_list = [2,3,5,7,9];
   let faculties = {kokusyo:2,syajo:3,kogaku:5,rigaku:7,kankyo:9,kango:11};
   address = create_faculty_url(html,faculties.kokusyo);  //工学部
   html = post(year,address);
@@ -12,15 +13,25 @@ function main(){
   console.log(Parser.data(html).from('<td width="94%" style="font-size: 14px;">').to('</td>').iterate());
   
   //授業一覧
-  address = Parser.data(html).from('<a class="kamokuLevel3" href="../').to('">').iterate();
-  console.log(address[0]);
-  html = post(year,address[0]);
+  let class_list = Parser.data(html).from('<a class="kamokuLevel3" href="../').to('">').iterate();
+  address = class_list[0];
+  console.log(address);
+  html = post(year,address);
 
   //シラバス表示
-  address = create_class_url(html);
-  console.log(address[0]);
-  html = post(year,address[0]);
+  let same_class_list = create_class_url(html);
+  let same_class_list_len = same_class_list.length;
+  console.log(same_class_list_len);
+  address = same_class_list[0];
+  console.log(address);
+  html = post(year, address);
   
+  let item_list = Parser.data(html).from('<div class="colHeader colStyle colBorder" style="width:16%; text-align:left;">').to('</div>').iterate();
+  console.log(item_list);
+  let details_list = Parser.data(html).from('\r\n\t\t\t\t\t\t\t\t<div>').to('</div>').iterate();
+  console.log(details_list);
+  let payload = [item_list,details_list];
+  spreadsheet_print(payload);
   console.log("https://syllabus.u-hyogo.ac.jp/slResult/"+String(year)+"/japanese/"+address[0]);
 }
 
@@ -44,4 +55,18 @@ function create_faculty_url(html,faculty){
 function create_class_url(html){
   address = Parser.data(html).from('<a href="../').to('">').iterate();
   return address;
+}
+
+//文字をスプレッドシートに挿入
+function spreadsheet_print(payload){
+  const SHEET_ID = "13vQBpUxpdoHQlBprvXmFu0MYi_YCkh8RCBYER87w1D0";
+  let ss = SpreadsheetApp.openById(SHEET_ID);
+  let sheet = ss.getSheetByName("sheet1");
+  for(let i=0;i<payload[0].length;i++){
+    sheet.getRange(i+1,1).setValue(payload[0][i]);
+    sheet.getRange(i+1,2).setValue(payload[1][i]);
+  }
+  //let table = sheet.getRange(row,1).setValue(21);
+  //Logger.log(table);
+
 }

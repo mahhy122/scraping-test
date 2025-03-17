@@ -1,6 +1,7 @@
 function main(){
   const year =2024;
   let address = "#";
+  let row = 0;
   //アクセス
   let html = post(year,address);
   
@@ -31,8 +32,10 @@ function main(){
   let details_list = Parser.data(html).from('\r\n\t\t\t\t\t\t\t\t<div>').to('</div>').iterate();
   console.log(details_list);
   let payload = [item_list,details_list];
-  spreadsheet_print(payload);
-  console.log("https://syllabus.u-hyogo.ac.jp/slResult/"+String(year)+"/japanese/"+address[0]);
+  let url = "https://syllabus.u-hyogo.ac.jp/slResult/"+String(year)+"/japanese/"+address;
+  spreadsheet_print(payload, url,row);
+  
+  console.log("https://syllabus.u-hyogo.ac.jp/slResult/"+String(year)+"/japanese/"+address);
 }
 
 //visit the website which you want.
@@ -58,15 +61,31 @@ function create_class_url(html){
 }
 
 //文字をスプレッドシートに挿入
-function spreadsheet_print(payload){
+function spreadsheet_print(payload,url,row){
   const SHEET_ID = "13vQBpUxpdoHQlBprvXmFu0MYi_YCkh8RCBYER87w1D0";
   let ss = SpreadsheetApp.openById(SHEET_ID);
   let sheet = ss.getSheetByName("sheet1");
-  for(let i=0;i<payload[0].length;i++){
-    sheet.getRange(i+1,1).setValue(payload[0][i]);
-    sheet.getRange(i+1,2).setValue(payload[1][i]);
-  }
-  //let table = sheet.getRange(row,1).setValue(21);
-  //Logger.log(table);
+
+
+  sheet.getRange(1+row,1).setValue(1);
+
+  sheet.getRange(1+row,2).setValue(payload[0][0]);
+  sheet.getRange(2+row,2).setValue(payload[1][0]);
+
+  sheet.getRange(1+row,3).setValue(payload[0][2]);
+  sheet.getRange(2+row,3).setValue(payload[1][2]);
+
+  sheet.getRange(1+row,4).setValue(payload[0][3]);
+  sheet.getRange(2+row,4).setValue(payload[1][4]);
+
+  sheet.getRange(1+row,5).setValue(payload[0][5]);
+  sheet.getRange(2+row,5).setValue(payload[1][7]);
+  
+  sheet.getRange(1+row,6).setValue(payload[0][9]);
+  sheet.getRange(2+row,6).setValue(payload[1][11]);
+
+  sheet.getRange(1+row,7).setValue("URL");
+  sheet.getRange(2+row,7).setValue(url);
+  
 
 }
